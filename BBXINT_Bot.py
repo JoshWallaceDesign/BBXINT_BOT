@@ -1,6 +1,8 @@
 import discord
 from asyncio import sleep, TimerHandle
 import random
+import os
+from dotenv import load_dotenv
 from discord.ext import commands
 import asyncio
 
@@ -349,4 +351,6 @@ async def on_ready():
     await client.change_presence(activity=discord.Game('BEATBOX INTERNATIONAL'))
     print('Bot is Online')
 
-client.run('NzIyNDUyODg0NTY1Nzg2NjU0.XuzZkg.uuiGyLhijpJaDONNvajT-lJsORg')
+load_dotenv()
+token = os.getenv('DISCORD_TOKEN')
+client.run(token)
