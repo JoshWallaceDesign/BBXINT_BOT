@@ -1,0 +1,1 @@
+worker: python BBXINT_Bot.py
