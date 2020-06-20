@@ -36,7 +36,7 @@ async def timer(ctx, seconds):
         stopTimer = False
         try:
             secondint = int(seconds)
-
+            secondint = 0
             if secondint < 0 or secondint == 0:
                 await ctx.send("Can't go lower than 0 seconds!")
             else:
