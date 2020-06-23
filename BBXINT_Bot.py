@@ -5,15 +5,41 @@ import os
 from dotenv import load_dotenv
 from discord.ext import commands
 import asyncio
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from pprint import pprint
 
+
+"""__________________Google Sheets__________________"""
+scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
+         "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+
+creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+
+gclient = gspread.authorize(creds)
+
+sheet = gclient.open("BBXINT_JUDGING").worksheet(
+    'PARTICIPANTS')  # Open the spreadhseet
+sheet2 = gclient.open("BBXINT_JUDGING").worksheet(
+    'JUDGE 1')  # Open the spreadhseet
+sheet3 = gclient.open("BBXINT_JUDGING").worksheet(
+    'JUDGE 2')  # Open the spreadhseet
+sheet4 = gclient.open("BBXINT_JUDGING").worksheet(
+    'JUDGE 3')  # Open the spreadhseet
+sheet5 = gclient.open("BBXINT_JUDGING").worksheet(
+    'JUDGE 4')  # Open the spreadhseet\
+sheet6 = gclient.open("BBXINT_JUDGING").worksheet(
+    'JUDGE 5')  # Open the spreadhseet
+
+data = sheet.get_all_records()  # Get a list of all records
+
+
+"""__________________Prefix__________________"""
 
 client = commands.Bot(command_prefix='!')
 
-
-stopTimer = False
-
-
 """__________________Timer__________________"""
+stopTimer = False
 
 
 @client.command()
@@ -138,6 +164,11 @@ async def join(ctx):
             await discord.Member.add_roles(member, role)
             print('not in queue')
             part = ctx.message.author.display_name
+            insertRow = [part]
+            if not sheet.findall(part):
+                sheet.append_row(insertRow, table_range='A2')
+            else:
+                print('found a match')
             parts = part
 
             if id in que:
@@ -148,6 +179,7 @@ async def join(ctx):
             embed = discord.Embed(
                 title=(part + ' has been Added to the Queue'), color=0xaaf542)
             await ctx.send(embed=embed)
+
     else:
         embed = discord.Embed(
             title=('The Queue is Locked!'), color=0xf55742)
@@ -163,7 +195,6 @@ async def leave(ctx):
     role = discord.utils.get(member.guild.roles, name="Participant")
     await discord.Member.remove_roles(member, role)
     x = ctx.message.author.display_name
-    '''x = que[id].index(ctx.message.author.display_name)'''
     print('Position', x)
     embed = discord.Embed(
         title=(ctx.message.author.display_name + ' has left the Queue!'), color=0xf55742)
@@ -186,9 +217,10 @@ async def queue(ctx):
         amount = len(que[id])
         print(amount)
         queholder = que[id]
-        embed = discord.Embed(title=('Participants | ' + str(amount) +
-                                     '\n' + ("\n".join(que[id]))), color=0x7289da)
+        embed = discord.Embed(
+            title=('Participants | ' + str(amount)), color=0x7289da)
         await ctx.send(embed=embed)
+        await ctx.send('LIST:' + '\n' + ("\n".join(que[id])))
         if len([que]) == 0:
             print('Queue Empty')
         else:
@@ -209,6 +241,11 @@ async def add(ctx, member: discord.Member):
         part = member.display_name
         role = discord.utils.get(member.guild.roles, name="Participant")
         await discord.Member.add_roles(member, role)
+        insertRow = [part]
+        if not sheet.findall(part):
+            sheet.append_row(insertRow, table_range='A2')
+        else:
+            print('found a match')
         parts = part
         if id in que:
             que[id].append(part)
@@ -284,8 +321,9 @@ async def next(ctx):
         embed = discord.Embed(
             title=('Up Next | ' + performingnow), color=0xaaf542)
         await ctx.send(embed=embed)
-        embed = discord.Embed(title=('Participants | ' + str(amount) +
-                                     '\n' + ("\n".join(que[id]))), color=0x7289da)
+        await ctx.send('LIST:' + '\n' + ("\n".join(que[id])))
+        embed = discord.Embed(
+            title=('Participants | ' + str(amount)), color=0x7289da)
         await ctx.send(embed=embed)
     else:
         embed = discord.Embed(
@@ -308,8 +346,9 @@ async def skip(ctx):
         embed = discord.Embed(
             title=('Up Next | ' + performingnow), color=0xaaf542)
         await ctx.send(embed=embed)
-        embed = discord.Embed(title=('Participants | ' + str(amount) +
-                                     '\n' + ("\n".join(que[id]))), color=0x7289da)
+        await ctx.send('LIST:' + '\n' + ("\n".join(que[id])))
+        embed = discord.Embed(
+            title=('Participants | ' + str(amount)), color=0x7289da)
         await ctx.send(embed=embed)
     else:
         embed = discord.Embed(
@@ -335,6 +374,38 @@ async def end(ctx):
             title=('This command is only for the Host!'), color=0xf55742)
         await ctx.send(embed=embed)
 
+
+@ client.command()
+async def resetsheet(ctx):
+    range_of_cells = sheet.range('A2:A151')
+    for cell in range_of_cells:
+        cell.value = ''
+    sheet.update_cells(range_of_cells)
+    range_of_cells = sheet2.range('B3:F152')
+    for cell in range_of_cells:
+        cell.value = ''
+    sheet2.update_cells(range_of_cells)
+    range_of_cells = sheet3.range('B3:F152')
+    for cell in range_of_cells:
+        cell.value = ''
+    sheet3.update_cells(range_of_cells)
+    range_of_cells = sheet4.range('B3:F152')
+    for cell in range_of_cells:
+        cell.value = ''
+    sheet4.update_cells(range_of_cells)
+    range_of_cells = sheet5.range('B3:F152')
+    for cell in range_of_cells:
+        cell.value = ''
+    sheet5.update_cells(range_of_cells)
+    range_of_cells = sheet6.range('B3:F152')
+    for cell in range_of_cells:
+        cell.value = ''
+    sheet6.update_cells(range_of_cells)
+
+
+@ client.command()
+async def dmsheet(ctx):
+    await ctx.author.send("Here's the BBXINT Judging Sheet " + '\n' + 'https://docs.google.com/spreadsheets/d/1FAIk6R9Rr12X-DyWlH3Z7vBUV8Ij74qGyTF4n86a66o/edit?usp=sharing')
 
 """__________________Queue System End__________________"""
 
