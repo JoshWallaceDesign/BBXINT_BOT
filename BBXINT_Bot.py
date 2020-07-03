@@ -2,6 +2,7 @@ import discord
 from asyncio import sleep, TimerHandle
 import random
 import os
+from discord.utils import get
 from dotenv import load_dotenv
 from discord.ext import commands
 import asyncio
@@ -38,7 +39,7 @@ data = sheet.get_all_records()  # Get a list of all records
 
 client = commands.Bot(command_prefix='!')
 
-"""__________________Timer__________________"""
+"""__________________Timer for Host__________________"""
 stopTimer = False
 
 
@@ -119,6 +120,75 @@ async def timer(ctx, seconds):
 @client.command()
 async def ping(ctx):
     await ctx.send(f'PongPo! {round(client.latency) *1000}ms')
+
+
+"""__________________Timer for Everyone__________________"""
+stopTimer2 = False
+
+
+@client.command()
+async def stoptime(ctx):
+    global stopTimer2
+    stopTimer2 = True
+    embed = discord.Embed(title="TIMER STOPPED", color=0xf55742)
+    await ctx.send(embed=embed)
+
+
+@client.command()
+async def time(ctx, seconds):
+
+    global stopTimer2
+    stopTimer2 = False
+    try:
+        secondint = int(seconds)
+        if secondint < 0 or secondint == 0:
+            await ctx.send("Can't go lower than 0 seconds!")
+        else:
+            embed = discord.Embed(
+                title=seconds + " SECONDS ON THE CLOCK", color=0x7289da)
+            await ctx.send(embed=embed)
+            while True:
+                secondint = secondint - 1
+                if secondint == 0:
+                    embed = discord.Embed(
+                        title="TIME", color=0xf55742)
+                    await ctx.send(embed=embed)
+                    break
+                await asyncio.sleep(1)
+                if secondint == 120:
+                    embed = discord.Embed(
+                        title="120 Seconds Left", color=0xaaf542)
+                if secondint == 105:
+                    embed = discord.Embed(
+                        title="105 Seconds Left", color=0xaaf542)
+                if secondint == 90:
+                    embed = discord.Embed(
+                        title="90 Seconds Left", color=0xaaf542)
+                    await ctx.send(embed=embed)
+                if secondint == 75:
+                    embed = discord.Embed(
+                        title="75 Seconds Left", color=0xaaf542)
+                    await ctx.send(embed=embed)
+                if secondint == 60:
+                    embed = discord.Embed(
+                        title="60 Seconds Left", color=0xaaf542)
+                    await ctx.send(embed=embed)
+                if secondint == 45:
+                    embed = discord.Embed(
+                        title="45 Seconds Left", color=0xf57e42)
+                    await ctx.send(embed=embed)
+                if secondint == 30:
+                    embed = discord.Embed(
+                        title="30 Seconds Left", color=0xf57e42)
+                    await ctx.send(embed=embed)
+                if secondint == 15:
+                    embed = discord.Embed(
+                        title="15 Seconds Left", color=0xf55742)
+                    await ctx.send(embed=embed)
+                if stopTimer2 == True:
+                    secondint = 0
+    except ValueError:
+        await ctx.send("Must be a number!")
 
 """CoinFlip"""
 
@@ -233,7 +303,7 @@ async def queue(ctx):
 """__________________Add & Kick for Host Only__________________"""
 
 
-@ client.command()
+@client.command()
 async def add(ctx, member: discord.Member):
     if discord.utils.get(ctx.message.author.roles, name="Host"):
         global parts
@@ -258,7 +328,7 @@ async def add(ctx, member: discord.Member):
         await ctx.send('This command is only for the Host!')
 
 
-@ client.command()
+@client.command()
 async def kick(ctx, member: discord.Member):
     if discord.utils.get(ctx.message.author.roles, name="Host"):
         global parts
@@ -279,7 +349,7 @@ async def kick(ctx, member: discord.Member):
 """__________________Lock & Unlock for Host Only__________________"""
 
 
-@ client.command()
+@client.command()
 async def lock(ctx):
     if discord.utils.get(ctx.message.author.roles, name="Host"):
         global locked
@@ -293,7 +363,7 @@ async def lock(ctx):
         await ctx.send(embed=embed)
 
 
-@ client.command()
+@client.command()
 async def unlock(ctx):
     if discord.utils.get(ctx.message.author.roles, name="Host"):
         global locked
@@ -309,7 +379,7 @@ async def unlock(ctx):
 """__________________Next, Skip, & End for Host Only__________________"""
 
 
-@ client.command()
+@client.command()
 async def next(ctx):
     if discord.utils.get(ctx.message.author.roles, name="Host"):
         global parts
@@ -331,7 +401,7 @@ async def next(ctx):
         await ctx.send(embed=embed)
 
 
-@ client.command()
+@client.command()
 async def skip(ctx):
     if discord.utils.get(ctx.message.author.roles, name="Host"):
         queholder = que[id]
@@ -356,7 +426,7 @@ async def skip(ctx):
         await ctx.send(embed=embed)
 
 
-@ client.command()
+@client.command()
 async def end(ctx):
     if discord.utils.get(ctx.message.author.roles, name="Host"):
         que.clear()
@@ -375,48 +445,59 @@ async def end(ctx):
         await ctx.send(embed=embed)
 
 
-@ client.command()
+@client.command()
 async def resetsheet(ctx):
-    range_of_cells = sheet.range('A2:A151')
-    for cell in range_of_cells:
-        cell.value = ''
-    sheet.update_cells(range_of_cells)
-    range_of_cells = sheet2.range('B3:F152')
-    for cell in range_of_cells:
-        cell.value = ''
-    sheet2.update_cells(range_of_cells)
-    range_of_cells = sheet3.range('B3:F152')
-    for cell in range_of_cells:
-        cell.value = ''
-    sheet3.update_cells(range_of_cells)
-    range_of_cells = sheet4.range('B3:F152')
-    for cell in range_of_cells:
-        cell.value = ''
-    sheet4.update_cells(range_of_cells)
-    range_of_cells = sheet5.range('B3:F152')
-    for cell in range_of_cells:
-        cell.value = ''
-    sheet5.update_cells(range_of_cells)
-    range_of_cells = sheet6.range('B3:F152')
-    for cell in range_of_cells:
-        cell.value = ''
-    sheet6.update_cells(range_of_cells)
+    if discord.utils.get(ctx.message.author.roles, name="Host"):
+        range_of_cells = sheet.range('A2:A151')
+        for cell in range_of_cells:
+            cell.value = ''
+        sheet.update_cells(range_of_cells)
+        range_of_cells = sheet2.range('B3:F152')
+        for cell in range_of_cells:
+            cell.value = ''
+        sheet2.update_cells(range_of_cells)
+        range_of_cells = sheet3.range('B3:F152')
+        for cell in range_of_cells:
+            cell.value = ''
+        sheet3.update_cells(range_of_cells)
+        range_of_cells = sheet4.range('B3:F152')
+        for cell in range_of_cells:
+            cell.value = ''
+        sheet4.update_cells(range_of_cells)
+        range_of_cells = sheet5.range('B3:F152')
+        for cell in range_of_cells:
+            cell.value = ''
+        sheet5.update_cells(range_of_cells)
+        range_of_cells = sheet6.range('B3:F152')
+        for cell in range_of_cells:
+            cell.value = ''
+        sheet6.update_cells(range_of_cells)
+    else:
+        embed = discord.Embed(
+            title=('This command is only for the Host!'), color=0xf55742)
+        await ctx.send(embed=embed)
 
 
-@ client.command()
+@client.command()
 async def dmsheet(ctx):
-    await ctx.author.send("Here's the BBXINT Judging Sheet " + '\n' + 'https://docs.google.com/spreadsheets/d/1FAIk6R9Rr12X-DyWlH3Z7vBUV8Ij74qGyTF4n86a66o/edit?usp=sharing')
+    if discord.utils.get(ctx.message.author.roles, name="Host"):
+        await ctx.author.send("Here's the BBXINT Judging Sheet " + '\n' + 'https://docs.google.com/spreadsheets/d/1FAIk6R9Rr12X-DyWlH3Z7vBUV8Ij74qGyTF4n86a66o/edit?usp=sharing')
+    else:
+        embed = discord.Embed(
+            title=('This command is only for the Host!'), color=0xf55742)
+        await ctx.send(embed=embed)
+
 
 """__________________Queue System End__________________"""
 
 
-@ client.command()
+@client.command()
 async def commandlist(ctx):
     await ctx.send("Event Commands:" + '\n' + '\n' + "TIMER & FLIP:" + '\n' + "!timer seconds | Timer followed by number of seconds" + '\n' + "!stop | Stops Timer" + '\n' + "!flip | Flips a coin" + '\n' + '\n' + "QUEUE:" + '\n' + "!join | Join Queue" + '\n' + "!leave | Leave Queue" + '\n' + "!queue | Show Queue" + '\n' + "Host Only:" +
                    '\n' + "!next | Next in Queue" + '\n' + "!skip | Skips to end of Queue" + '\n' + "!add @member | Adds @member to Queue" + '\n' + "!kick @member | Kicks @member from Queue" + '\n' + "!lock | Locks Queue" + '\n' + "!unlock | Unlocks Queue" + '\n' + "!end | Ends Event & Clears Queue")
 
 
-@ client.event
+@client.event
 async def on_ready():
     await client.change_presence(activity=discord.Game('BEATBOX INTERNATIONAL'))
     print('Bot is Online')
