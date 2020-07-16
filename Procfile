@@ -1,1 +1,1 @@
-worker: python BBXINT_Bot.py
+worker: python bot.py
