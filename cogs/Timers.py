@@ -14,7 +14,7 @@ class EventTimer(commands.Cog):
     stopTimer = False
 
     @commands.command()
-    async def stoptimer(self, ctx):
+    async def stop(self, ctx):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             global stopTimer
             stopTimer = True
