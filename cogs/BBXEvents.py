@@ -51,6 +51,7 @@ class EventQueue(commands.Cog):
     """__________________Join & Leave__________________"""
 
     @commands.command()
+    @commands.guild_only()
     async def join(self, ctx):
         if locked == False:
             global parts
