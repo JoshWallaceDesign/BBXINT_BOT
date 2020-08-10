@@ -29,7 +29,7 @@ async def _8ball(ctx, *, question):
     await ctx.send(f'Questions: {question}\n Answers: {random.choice(responses)}')
 
 extensions = ['cogs.HelpEvents',
-              'cogs.Timers', 'cogs.BBXEvents']
+              'cogs.Music', 'cogs.Timers', 'cogs.BBXEvents']
 
 if __name__ == "__main__":
     for ext in extensions:
