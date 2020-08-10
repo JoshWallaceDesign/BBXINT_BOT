@@ -22,7 +22,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name(
 gclient = gspread.authorize(creds)
 
 sheet = gclient.open("BBXINT_JUDGING").worksheet(
-    'PARTICIPANTS')  # Open the spreadhseet
+    'HOST')  # Open the spreadhseet
 sheet2 = gclient.open("BBXINT_JUDGING").worksheet(
     'JUDGE 1')  # Open the spreadhseet
 sheet3 = gclient.open("BBXINT_JUDGING").worksheet(
@@ -33,6 +33,14 @@ sheet5 = gclient.open("BBXINT_JUDGING").worksheet(
     'JUDGE 4')  # Open the spreadhseet\
 sheet6 = gclient.open("BBXINT_JUDGING").worksheet(
     'JUDGE 5')  # Open the spreadhseet
+sheet7 = gclient.open("BBXINT_JUDGING").worksheet(
+    'Event: Top 16')  # Open the spreadhseet
+sheet8 = gclient.open("BBXINT_JUDGING").worksheet(
+    'Event: Top 8')  # Open the spreadhseet
+sheet9 = gclient.open("BBXINT_JUDGING").worksheet(
+    'Results')  # Open the spreadhseet
+sheet10 = gclient.open("BBXINT_JUDGING").worksheet(
+    'RANKCALC')  # Open the spreadhseet
 
 data = sheet.get_all_records()  # Get a list of all records
 
@@ -51,7 +59,6 @@ class EventQueue(commands.Cog):
     """__________________Join & Leave__________________"""
 
     @commands.command()
-    @commands.guild_only()
     async def join(self, ctx):
         if locked == False:
             global parts
@@ -172,7 +179,7 @@ class EventQueue(commands.Cog):
     """__________________Lock & Unlock for Host Only__________________"""
 
     @ commands.command()
-    async def lock(self, ctx):
+    async def close(self, ctx):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             global locked
             locked = True
@@ -185,7 +192,7 @@ class EventQueue(commands.Cog):
             await ctx.send(embed=embed)
 
     @ commands.command()
-    async def unlock(self, ctx):
+    async def open(self, ctx):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             global locked
             locked = False
@@ -240,8 +247,9 @@ class EventQueue(commands.Cog):
     async def end(self, ctx):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             que.clear()
+            text_channel = self.client.get_channel(678189261656293376)
             embed = discord.Embed(
-                title=('The Event is now Over!'), color=0x7289da)
+                title=('The Event is now Over!'), description=(f"**---Please Use {text_channel.mention}---**"), color=0x7289da)
             await ctx.send(embed=embed)
             role_to_remove = "Participant"
             for user in ctx.guild.members:
@@ -254,8 +262,8 @@ class EventQueue(commands.Cog):
                 title=('This command is only for the Host!'), color=0xf55742)
             await ctx.send(embed=embed)
 
-    @ commands.command(aliases=['corona', 'covid', 'lk', 'close'])
-    async def lockdown(self, ctx, channel: discord.TextChannel = None):
+    @ commands.command(aliases=['corona', 'covid', 'lk'])
+    async def lock(self, ctx, channel: discord.TextChannel = None):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             channel = channel or ctx.channel
             overwrite = channel.overwrites_for(ctx.guild.default_role)
@@ -270,8 +278,8 @@ class EventQueue(commands.Cog):
                 title=('This command is only for the Host!'), color=0xf55742)
             await ctx.send(embed=embed)
 
-    @ commands.command(aliases=['ulk', 'open'])
-    async def freedom(self, ctx, channel: discord.TextChannel = None):
+    @ commands.command(aliases=['ulk'])
+    async def unlock(self, ctx, channel: discord.TextChannel = None):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             channel = channel or ctx.channel
             overwrite = channel.overwrites_for(ctx.guild.default_role)
@@ -294,33 +302,119 @@ class EventQueue(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
+    async def battles(self, ctx):
+        battlelist = sheet10.col_values(6)
+        embed = discord.Embed(
+            title=("**TOP 16 BATTLES**"), description=("\n".join(battlelist)), color=0x7289da)
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def top16(self, ctx):
+        if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
+            topscore16 = sheet10.col_values(5)
+            embed = discord.Embed(
+                title=("**Today's TOP 16**"), description=("\n".join(topscore16)), color=0x7289da)
+            message = await ctx.send(embed=embed)
+            await message.pin()
+
+    @commands.command()
     async def resetsheet(self, ctx):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             range_of_cells = sheet.range('A2:A151')
             for cell in range_of_cells:
                 cell.value = ''
             sheet.update_cells(range_of_cells)
-            range_of_cells = sheet2.range('B3:F152')
+            range_of_cells = sheet2.range('C3:G152')
             for cell in range_of_cells:
                 cell.value = ''
             sheet2.update_cells(range_of_cells)
-            range_of_cells = sheet3.range('B3:F152')
+            range_of_cells = sheet3.range('C3:G152')
             for cell in range_of_cells:
                 cell.value = ''
             sheet3.update_cells(range_of_cells)
-            range_of_cells = sheet4.range('B3:F152')
+            range_of_cells = sheet4.range('C3:G152')
             for cell in range_of_cells:
                 cell.value = ''
             sheet4.update_cells(range_of_cells)
-            range_of_cells = sheet5.range('B3:F152')
+            range_of_cells = sheet5.range('C3:G152')
             for cell in range_of_cells:
                 cell.value = ''
             sheet5.update_cells(range_of_cells)
-            range_of_cells = sheet6.range('B3:F152')
+            range_of_cells = sheet6.range('C3:G152')
             for cell in range_of_cells:
                 cell.value = ''
             sheet6.update_cells(range_of_cells)
+            range_of_cells = sheet9.range('F3:F18')
+            for cell in range_of_cells:
+                cell.value = ''
+            sheet9.update_cells(range_of_cells)
+            range_of_cells = sheet9.range('E3:E18')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet9.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('J3:L5')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('J8:L10')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('J14:L16')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('J20:L22')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('J26:L28')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('O3:Q5')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('O8:Q10')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('O14:Q16')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('O20:Q22')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('T3:V5')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('T8:V10')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('T14:V16')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('Y3:AA5')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('Y8:AA10')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+            range_of_cells = sheet7.range('Y14:AA16')
+            for cell in range_of_cells:
+                cell.value = False
+            sheet7.update_cells(range_of_cells)
+
             await ctx.message.delete()
+
         else:
             embed = discord.Embed(
                 title=('This command is only for the Host!'), color=0xf55742)
