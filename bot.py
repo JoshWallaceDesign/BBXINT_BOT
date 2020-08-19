@@ -22,6 +22,11 @@ async def on_ready():
     return await client.change_presence(activity=discord.Activity(type=3, name='youtube.com/beatboxinternational'))
 
 
+@client.event
+async def on_command_error(ctx, error):
+    pass
+
+
 @client.command(aliases=['8ball', 'test'])
 async def _8ball(ctx, *, question):
     responses = ['You suck. So, no.',
