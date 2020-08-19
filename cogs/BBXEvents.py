@@ -78,10 +78,7 @@ class EventQueue(commands.Cog):
                 print('not in queue')
                 part = ctx.message.author.display_name
                 insertRow = [part]
-                if not sheet.findall(part):
-                    sheet.append_row(insertRow, table_range='A2')
-                else:
-                    print('found a match')
+
                 parts = part
 
                 if id in que:
@@ -92,6 +89,11 @@ class EventQueue(commands.Cog):
                 embed = discord.Embed(
                     title=(part + ' has been Added to the Queue'), color=0xaaf542)
                 await ctx.send(embed=embed)
+                if not sheet.findall(part):
+                    sheet.append_row(insertRow, table_range='A2')
+
+                else:
+                    print('found a match')
 
         else:
             embed = discord.Embed(
@@ -113,6 +115,9 @@ class EventQueue(commands.Cog):
         await ctx.send(embed=embed)
         part = que[id].remove(x)
         parts = part
+        cell_list = sheet.findall(nick)
+        value = cell_list[0]
+        sheet.update_cell(value.row, value.col, 'Left the Queue')
 
     """__________________Queue__________________"""
 
@@ -214,10 +219,14 @@ class EventQueue(commands.Cog):
             parts = part
             queholder = que[id]
             performingnow = queholder[0]
+
             amount = len(que[id])
             embed = discord.Embed(
                 title=('Next Up | ' + performingnow), description=(f'**__{str(amount)} Total Participants__**' + '\n' + ("\n".join(que[id]))), color=0x7289da)
             await ctx.send(embed=embed)
+            for user in ctx.guild.members:
+                if user.display_name == performingnow:
+                    await user.edit(mute=False)
         else:
             embed = discord.Embed(
                 title=('This command is only for the Host!'), color=0xf55742)
@@ -302,22 +311,40 @@ class EventQueue(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def battles(self, ctx):
-        battlelist = sheet10.col_values(6)
-        embed = discord.Embed(
-            title=("**TOP 16 BATTLES**"), description=("\n".join(battlelist)), color=0x7289da)
-        await ctx.send(embed=embed)
-
-    @commands.command()
     async def top16(self, ctx):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             topscore16 = sheet10.col_values(5)
+            battlelist = sheet10.col_values(6)
             embed = discord.Embed(
-                title=("**Today's TOP 16**"), description=("\n".join(topscore16)), color=0x7289da)
+                title=("**TODAY'S TOP 16 & BATTLE BRACKET**"), color=0xff4000)
+            embed.add_field(name="Top 16", value=(
+                "\n".join(topscore16)), inline=True)
+            embed.add_field(name="|", value="**|**", inline=True)
+            embed.add_field(name="BATTLE BRACKET", value=(
+                "\n".join(battlelist)), inline=True)
+            embed.set_author(
+                name="BEATBOXINTERNATIONAL.COM", url="https://www.beatboxinternational.com", icon_url="https://lh3.googleusercontent.com/a-/AOh14GiBlYNVkzQLbkdzK-prRDKGmfy2INbA9n3Og0A-Bg=s88")
             message = await ctx.send(embed=embed)
             await message.pin()
 
-    @commands.command()
+    @ commands.command()
+    async def top8(self, ctx):
+        if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
+            topscore8 = sheet10.col_values(7)
+            battlelist = sheet10.col_values(8)
+            embed = discord.Embed(
+                title=("**TODAY'S TOP 8 & BATTLE BRACKET**"), color=0xff4000)
+            embed.add_field(name="Top 8", value=(
+                "\n".join(topscore8)), inline=True)
+            embed.add_field(name="|", value="**|**", inline=True)
+            embed.add_field(name="BATTLE BRACKET", value=(
+                "\n".join(battlelist)), inline=True)
+            embed.set_author(
+                name="BEATBOXINTERNATIONAL.COM", url="https://www.beatboxinternational.com", icon_url="https://lh3.googleusercontent.com/a-/AOh14GiBlYNVkzQLbkdzK-prRDKGmfy2INbA9n3Og0A-Bg=s88")
+            message = await ctx.send(embed=embed)
+            await message.pin()
+
+    @ commands.command()
     async def resetsheet(self, ctx):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             range_of_cells = sheet.range('A2:A151')
@@ -420,7 +447,7 @@ class EventQueue(commands.Cog):
                 title=('This command is only for the Host!'), color=0xf55742)
             await ctx.send(embed=embed)
 
-    @commands.command()
+    @ commands.command()
     async def dmsheet(self, ctx):
         if discord.utils.get(ctx.message.author.roles, name="Host") or discord.utils.get(ctx.message.author.roles, name="BBXINT Staff"):
             await ctx.author.send("Here's the BBXINT Judging Sheet " + '\n' + 'https://docs.google.com/spreadsheets/d/1FAIk6R9Rr12X-DyWlH3Z7vBUV8Ij74qGyTF4n86a66o/edit?usp=sharing')
